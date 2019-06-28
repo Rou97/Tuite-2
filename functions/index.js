@@ -20,8 +20,7 @@ var config = {
     storageBucket: "tuite-2-4be7b.appspot.com",
     messagingSenderId: "291047333892",
     appId: "1:291047333892:web:93d776f1a1f68511"
-  };
-
+};
 
 const firebase = require('firebase');
 firebase.initializeApp(config);
