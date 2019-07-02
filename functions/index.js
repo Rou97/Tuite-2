@@ -6,11 +6,12 @@ const app = express();
 
 const fbAuth = require('./util/fbAuth');
 
-const { signup, login } = require('./handlers/users');
+const { signup, login, uploadImage } = require('./handlers/users');
 
 //Users routes
 app.post('/signup', signup);
 app.post('/login', login);
+app.post('/user/image', fbAuth, uploadImage);
 
 exports.api = functions.region('europe-west1').https.onRequest(app);
 
