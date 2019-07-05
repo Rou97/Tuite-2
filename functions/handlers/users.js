@@ -1,11 +1,13 @@
 const { admin, db } = require('../util/admin');
 
+require('dotenv').config();
 const config = require('../util/config');
 
 const firebase = require('firebase');
 firebase.initializeApp(config);
 
 const { validateSignupData, validateLoginData } = require('../util/validators');
+
 
 exports.signup = (req, res) => {
     const newUser = {
@@ -41,8 +43,9 @@ exports.signup = (req, res) => {
                 handle: newUser.handle,
                 email: newUser.email,
                 createdAt: new Date().toISOString(),
-                imageUrl: `https://firebasestorage.googleapis.com/v0/b/
-                    ${config.storageBucket}/o/${noImg}?alt=media`,
+                imageUrl: `https://firebasestorage.googleapis.com/v0/b/${
+                  config.storageBucket
+                }/o/${noImg}?alt=media`,
                 userId
             }
             return db.doc(`/users/${newUser.handle}`).set(userCredentials);
@@ -51,7 +54,7 @@ exports.signup = (req, res) => {
             return res.status(201).json({token});
         })
         .catch(err => {
-            console.error(err);
+            console.error('1', err);
             if(err.code === 'auth/email-already-in-use') {
                 return res.status(400).json({ email: 'Email is already use'});
             } else {
@@ -78,7 +81,7 @@ exports.login = (req, res) => {
         return res.json({ token });
         })
         .catch((err) => {
-        console.error(err);
+        console.error('2', err);
         if (err.code === 'auth/wrong-password') {
             return res.status(403).json({ general: 'Wrong credentials, please try again' });
         } else return res.status(500).json({ error: err.code });
@@ -90,16 +93,20 @@ exports.uploadImage = (req, res) => {
     const path = require('path');
     const os = require('os');
     const fs = require('fs');
-  
+
     const busboy = new BusBoy({ headers: req.headers });
   
     let imageFileName;
     let imageToBeUploaded = {};
+
   
     busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
       if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
         return res.status(400).json({ error: 'Wrong file type submitted' });
       }
+
+      console.log('fieldname', fieldname);
+      console.log('encoding', encoding);
     
       const imageExtension = filename.split('.')[filename.split('.').length - 1];
       
@@ -110,6 +117,7 @@ exports.uploadImage = (req, res) => {
       imageToBeUploaded = { filepath, mimetype };
       file.pipe(fs.createWriteStream(filepath));
     });
+
     busboy.on('finish', () => {
       admin
         .storage()
@@ -123,8 +131,9 @@ exports.uploadImage = (req, res) => {
           }
         })
         .then(() => {
-          const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}
-            /o/${imageFileName}?alt=media`;
+          const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${
+            config.storageBucket
+          }/o/${imageFileName}?alt=media`;
           return db.doc(`/users/${req.user.handle}`).update({ imageUrl });
         })
         .then(() => {
