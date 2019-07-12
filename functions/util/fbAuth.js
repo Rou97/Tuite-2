@@ -24,7 +24,6 @@ module.exports = (req, res, next) => {
                 .get();
         })
         .then((data) => {
-            console.log(req.user);
             req.user.handle = data.docs[0].data().handle;
             req.user.imageUrl = data.docs[0].data().imageUrl;
             return next();
