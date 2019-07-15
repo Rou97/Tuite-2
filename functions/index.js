@@ -90,7 +90,7 @@ exports.createNotificationOnComment = functions
 		return db.doc(`/screams/${snapshot.data().screamId}`)
 			.get()
 			.then((doc) => {
-				if (doc.exists) {
+				if (doc.exists && doc.data().userHandle !== snapshot.data().userHandle) {
 					return db.doc(`/notifications/${snapshot.id}`).set({
 					createdAt: new Date().toISOString(),
 					recipient: doc.data().userHandle,
