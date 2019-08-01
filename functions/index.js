@@ -6,6 +6,9 @@ const app = express();
 
 const FBAuth = require('./util/fbAuth');
 
+const cors = require('cors');
+app.use(cors());
+
 const { db } = require('./util/admin');
 
 const {
@@ -52,23 +55,23 @@ exports.createNotificationOnLike = functions
 	.firestore.document('likes/{id}')
 	.onCreate((snapshot) => {
 		return db.doc(`/screams/${snapshot.data().screamId}`)
-		.get()
-		.then((doc) => {
-			if (doc.exists && doc.data().userHandle !== snapshot.data().userHandle) {
-				return db.doc(`/notifications/${snapshot.id}`).set({
-				createdAt: new Date().toISOString(),
-				recipient: doc.data().userHandle,
-				sender: snapshot.data().userHandle,
-				type: 'like',
-				read: false,
-				screamId: doc.id
-				});
-			}
-		})
-		.catch((err) => {
-			console.error(err);
-			return;
-		});
+			.get()
+			.then((doc) => {
+				if (doc.exists && doc.data().userHandle !== snapshot.data().userHandle) {
+					return db.doc(`/notifications/${snapshot.id}`).set({
+						createdAt: new Date().toISOString(),
+						recipient: doc.data().userHandle,
+						sender: snapshot.data().userHandle,
+						type: 'like',
+						read: false,
+						screamId: doc.id
+					});
+				}
+			})
+			.catch((err) => {
+				console.error(err);
+				return;
+			});
 	});
 
 exports.deleteNotificationOnUnLike = functions
@@ -92,12 +95,12 @@ exports.createNotificationOnComment = functions
 			.then((doc) => {
 				if (doc.exists && doc.data().userHandle !== snapshot.data().userHandle) {
 					return db.doc(`/notifications/${snapshot.id}`).set({
-					createdAt: new Date().toISOString(),
-					recipient: doc.data().userHandle,
-					sender: snapshot.data().userHandle,
-					type: 'comment',
-					read: false,
-					screamId: doc.id
+						createdAt: new Date().toISOString(),
+						recipient: doc.data().userHandle,
+						sender: snapshot.data().userHandle,
+						type: 'comment',
+						read: false,
+						screamId: doc.id
 					});
 				}
 			})
@@ -113,7 +116,7 @@ exports.onUserImageChange = functions
 	.onUpdate((change) => {
 		console.log(change.before.data());
 		console.log(change.after.data());
-			if (change.before.data().imageUrl !== change.after.data().imageUrl) {
+		if (change.before.data().imageUrl !== change.after.data().imageUrl) {
 			console.log('image has changed');
 			const batch = db.batch();
 			return db
@@ -121,15 +124,15 @@ exports.onUserImageChange = functions
 				.where('userHandle', '==', change.before.data().handle)
 				.get()
 				.then((data) => {
-				data.forEach((doc) => {
-					const scream = db.doc(`/screams/${doc.id}`);
-					batch.update(scream, { userImage: change.after.data().imageUrl });
+					data.forEach((doc) => {
+						const scream = db.doc(`/screams/${doc.id}`);
+						batch.update(scream, { userImage: change.after.data().imageUrl });
+					});
+					return batch.commit();
 				});
-				return batch.commit();
-				});
-			} else return true;
+		} else return true;
 	});
-  
+
 exports.onScreamDelete = functions
 	.region('europe-west1')
 	.firestore.document('/screams/{screamId}')
