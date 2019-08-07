@@ -1,5 +1,5 @@
 module.exports = {
-    apiKey: process.env.API_KEY,
+    apiKey: "AIzaSyA2Hq8Mj0kIc0POA5nAPd2ejX9YomD15iw",
     authDomain: "tuite-2-4be7b.firebaseapp.com",
     databaseURL: "https://tuite-2-4be7b.firebaseio.com",
     projectId: "tuite-2-4be7b",

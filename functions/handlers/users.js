@@ -117,10 +117,10 @@ exports.getUserDetails = (req, res) => {
 			if (doc.exists) {
 				userData.user = doc.data();
 				return db
-				.collection('screams')
-				.where('userHandle', '==', req.params.handle)
-				.orderBy('createdAt', 'desc')
-				.get();
+					.collection('screams')
+					.where('userHandle', '==', req.params.handle)
+					.orderBy('createdAt', 'desc')
+					.get();
 			} else {
 				return res.status(404).json({ errror: 'User not found' });
 			}
@@ -129,13 +129,13 @@ exports.getUserDetails = (req, res) => {
 			userData.screams = [];
 			data.forEach((doc) => {
 				userData.screams.push({
-				body: doc.data().body,
-				createdAt: doc.data().createdAt,
-				userHandle: doc.data().userHandle,
-				userImage: doc.data().userImage,
-				likeCount: doc.data().likeCount,
-				commentCount: doc.data().commentCount,
-				screamId: doc.id
+					body: doc.data().body,
+					createdAt: doc.data().createdAt,
+					userHandle: doc.data().userHandle,
+					userImage: doc.data().userImage,
+					likeCount: doc.data().likeCount,
+					commentCount: doc.data().commentCount,
+					screamId: doc.id
 				});
 			});
 			return res.json(userData);
@@ -144,7 +144,7 @@ exports.getUserDetails = (req, res) => {
 			console.error(err);
 			return res.status(500).json({ error: err.code });
 		});
-	};
+};
 
 // Get own user details
 exports.getAuthenticatedUser = (req, res) => {
@@ -183,10 +183,10 @@ exports.getAuthenticatedUser = (req, res) => {
 					type: doc.data().type,
 					read: doc.data().read,
 					notificationId: doc.id
-			  });
+				});
 			});
 			return res.json(userData);
-		  })
+		})
 		.catch((err) => {
 			console.error(err);
 			return res.status(500).json({ error: err.code });
@@ -201,11 +201,14 @@ exports.uploadImage = (req, res) => {
 
 	const busboy = new BusBoy({ headers: req.headers });
 
+	busboy.opts.headers.contentType = 'application/json';
+	// console.log(busboy.opts.headers.contentType);
+
 	let imageToBeUploaded = {};
 	let imageFileName;
 
 	busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-		console.log(fieldname, file, filename, encoding, mimetype);
+		//console.log(fieldname, file, filename, encoding, mimetype);
 		if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
 			return res.status(400).json({ error: 'Wrong file type submitted' });
 		}
@@ -222,7 +225,7 @@ exports.uploadImage = (req, res) => {
 	busboy.on('finish', () => {
 		admin
 			.storage()
-			.bucket()
+			.bucket(imageFileName)
 			.upload(imageToBeUploaded.filepath, {
 				resumable: false,
 				metadata: {
@@ -263,4 +266,4 @@ exports.markNotificationsRead = (req, res) => {
 			console.error(err);
 			return res.status(500).json({ error: err.code });
 		});
-	};
+};
